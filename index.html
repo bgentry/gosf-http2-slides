@@ -48,11 +48,213 @@
         </section>
 
         <section>
-          <h2>Hello There</h2>
-          <p>
-            reveal.js enables you to create beautiful interactive slide decks using HTML. This presentation will show you examples of what it can do.
-          </p>
+          <section>
+            <aside class="notes">
+              <p>
+                My goal is not to spend a lot of time talking about the basics of
+                HTTP/2. I'm going to just briefly talk about the basics, but I
+                encourage you to go learn more if you're not familiar with it.
+              </p>
+            </aside>
+            <h1>HTTP/2</h1>
+            <h3>A quick intro</h3>
+          </section>
+
+          <section>
+            <h2>Why HTTP/2?</h2>
+            <p>Performance.</p>
+            <ul>
+              <li>End-user perceived latency</li>
+              <li>Network and server resource usage</li>
+              <li>More effective use of bandwidth</li>
+            </ul>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                From an application's perspective, HTTP/2 works the same as
+                HTTP/1.1. They are semantically identical.
+              </p>
+            </aside>
+            <h2>HTTP/2 is just like HTTP/1.1*</h2>
+            <h4>
+              *Semantically, at least.
+            </h4>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                The most important thing to remember about HTTP/2 is that it's
+                still just HTTP. Same request methods, same status codes. URLs
+                are not allowed to change. The same mental model of HTTP
+                behavior is still valid.
+              </p>
+            </aside>
+            <h2>Stuff that doesnt change</h2>
+            <ul>
+              <li>Request methods</li>
+              <li>Status codes</li>
+              <li>URLs</li>
+              <li>Other HTTP paradigms</li>
+            </ul>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                Instead of a plaintext, loosely defined wire protocol, HTTP/2
+                uses a binary framing layer to encode HTTP messages on the wire.
+              </p>
+              <p>
+                They're still the same HTTP messages, they're just encoded
+                differently. One of the best things about this is the format is
+                very strictly defined, and as a result, it's much easier to write
+                interoperable parsers for it.
+              </p>
+            </aside>
+            <h2>HTTP/2</h2>
+            <h2>==</h2>
+            <h2>a new binary framing layer for HTTP</h2>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                The other key differences that you've probably heard about:
+              </p>
+              <ul>
+                <li>
+                  Requests and responses are multiplexed. You can make many
+                  requests on the same connection, and receive many responses in
+                  any order. There's no head-of-line-blocking problem
+                  that made HTTP/1.1 pipelining so impractical.
+                </li>
+                <li>
+                  Header compression: HTTP headers are extremely redundant and
+                  verbose, introducing a high overhead for each request
+                  (especially small ones). With HTTP/2's header compression
+                  scheme HPACK, the headers for a single request can be
+                  compressed into just a few bytes. This is especially helpful
+                  for small requests because many requests can now be
+                  compressed into a single packet.
+                </li>
+                <li>
+                  TLS is not technically required by the spec but in practice
+                  will be. There was some drama around this. Chrome &amp;
+                  Firefox leads have both said their implementations will be
+                  TLS-only.
+                </li>
+                <li>
+                  HTTP/2 mandates TLS 1.2 or higher with strict security
+                  settings. Secure cipher suites, ephemeral keys, no
+                  renegotiation.
+                </li>
+                <li>
+                  Less optional parts means less compatibility issues.
+                </li>
+              </ul>
+            </aside>
+            <h2>HTTP/2: Main Improvements</h2>
+            <ul>
+              <li>Multiplexed streams (requests &amp; responses)</li>
+              <li>Header compression (HPACK)</li>
+              <li>Secure TLS required-<em>ish</em></li>
+              <li>Less optional parts</li>
+            </ul>
+          </section>
+
+          <section>
+            <h2>Does it matter?</h2>
+          </section>
+
+          <section data-background-video="https://s3.amazonaws.com/f.cl.ly/items/0J0L1n0N1b1p1z1y2x1o/http2-akamai-demo-proccessed.mp4">
+            <aside class="notes">
+              Admittedly, this is comparing a pathological, unoptimized case
+              for HTTP/1.1.
+            </aside>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                We've evolved work-arounds to deal w/ this sort of problem, like
+                domain sharding, image sprites, and other asset concatenation.
+              </p>
+              <p>
+                These hacks are actually harmful to HTTP/2 performance. Domain
+                sharding increases latency variance, client &amp; server load,
+                and is more painful on high-latency or lossy mobile networks.
+                Asset concatenation decreases cacheability and often means
+                redownloading entire resources they're mostly unchanged.
+                Spriting also means downloading assets that may not be needed on
+                a given page.
+              </p>
+              <p>
+                Because HTTP/1.1 and HTTP/2 are going to coexist for a while,
+                application developers will need to decide which target they
+                want to optimize for, or develop techniques to optimize for
+                both. You can imagine having a web server that's smart enough to
+                toggle HTTP/1.1 hacks depending on the client.
+              </p>
+            </aside>
+            <h2>HTTP/1.1 optimzations that are harmful to HTTP/2 perf:</h2>
+            <ul>
+              <li>Domain sharding</li>
+              <li>Image sprites</li>
+              <li>Inlining</li>
+              <li>Asset concatenation</li>
+            </ul>
+          </section>
         </section>
+
+        <section>
+          <aside class="notes">
+            <p>The strictly new stuff</p>
+            <ul>
+              <li>
+                Flow control:
+              </li>
+              <li>
+                Server push:
+              </li>
+            </ul>
+          </aside>
+          <h1>HTTP/2: New features</h1>
+          <ul>
+            <li>Flow control</li>
+            <li>Server push</li>
+            <li>Stream priority</li>
+          </ul>
+        </section>
+
+
+        <section>
+          <h1>References</h1>
+          <ul>
+            <li>
+              <a target='_blank' href='https://tools.ietf.org/html/draft-ietf-httpbis-http2-17'>
+                HTTP/2 Draft 17
+              </a>,
+              <a target='_blank' href='https://tools.ietf.org/html/draft-ietf-httpbis-header-compression-11'>
+                HPACK Draft 11
+              </a>
+            </li>
+            <li>
+              <a target='_blank' href='http://dev.chromium.org/spdy/spdy-whitepaper'>
+                SPDY Whitepaper
+              </a>
+            </li>
+            <li>
+              <a target='_blank' href='http://daniel.haxx.se/http2/'>
+                HTTP/2 Explained
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <!-- TODO(bgentry): delete everything after this.... -->
 
         <!-- Example of nested vertical slides -->
         <section>
