@@ -131,6 +131,9 @@
                   that made HTTP/1.1 pipelining so impractical.
                 </li>
                 <li>
+                  Flow control:
+                </li>
+                <li>
                   Header compression: HTTP headers are extremely redundant and
                   verbose, introducing a high overhead for each request
                   (especially small ones). With HTTP/2's header compression
@@ -141,9 +144,9 @@
                 </li>
                 <li>
                   TLS is not technically required by the spec but in practice
-                  will be. There was some drama around this. Chrome &amp;
-                  Firefox leads have both said their implementations will be
-                  TLS-only.
+                  will be. There was some drama around this in the WG. Chrome
+                  &amp; Firefox leads have both said their implementations will
+                  be TLS-only.
                 </li>
                 <li>
                   HTTP/2 mandates TLS 1.2 or higher with strict security
@@ -151,13 +154,14 @@
                   renegotiation.
                 </li>
                 <li>
-                  Less optional parts means less compatibility issues.
+                  Less optional parts means fewer compatibility issues.
                 </li>
               </ul>
             </aside>
             <h2>HTTP/2: Main Improvements</h2>
             <ul>
               <li>Multiplexed streams (requests &amp; responses)</li>
+              <li>Flow control</li>
               <li>Header compression (HPACK)</li>
               <li>Secure TLS required-<em>ish</em></li>
               <li>Less optional parts</li>
@@ -179,7 +183,8 @@
             <aside class="notes">
               <p>
                 We've evolved work-arounds to deal w/ this sort of problem, like
-                domain sharding, image sprites, and other asset concatenation.
+                domain sharding, inlining, image sprites, and other asset
+                concatenation.
               </p>
               <p>
                 These hacks are actually harmful to HTTP/2 performance. Domain
@@ -190,6 +195,19 @@
                 Spriting also means downloading assets that may not be needed on
                 a given page.
               </p>
+            </aside>
+            <h2>HTTP/1.1 optimizations</h2>
+            <h2>harmful to HTTP/2 perf</h2>
+            <ul>
+              <li>Domain sharding</li>
+              <li>Image sprites</li>
+              <li>Inlining</li>
+              <li>Asset concatenation</li>
+            </ul>
+          </section>
+
+          <section>
+            <aside class="notes">
               <p>
                 Because HTTP/1.1 and HTTP/2 are going to coexist for a while,
                 application developers will need to decide which target they
@@ -198,36 +216,181 @@
                 toggle HTTP/1.1 hacks depending on the client.
               </p>
             </aside>
-            <h2>HTTP/1.1 optimzations that are harmful to HTTP/2 perf:</h2>
-            <ul>
-              <li>Domain sharding</li>
-              <li>Image sprites</li>
-              <li>Inlining</li>
-              <li>Asset concatenation</li>
-            </ul>
+            <h2>Optimize for HTTP/1.1 or HTTP/2?</h2>
+            <p>Decide when to switch</p>
+            <p><em>OR</em></p>
+            <p>optimize for both at the same time</p>
+          </section>
+
+          <section>
+            <h2>HTTP/2 is already here!</h2>
+            <p>
+              &gt;9% usage in Firefox
+              (<a target='_blank' href='https://telemetry.mozilla.org/#filter=release%2F37%2FHTTP_RESPONSE_VERSION%2Fsaved_session%2FFirefox&aggregates=multiselect-all!Submissions&evoOver=Builds&locked=true&sanitize=true&renderhistogram=Graph'>source</a>)
+            </p>
           </section>
         </section>
 
+        <!-- END INTRO SECTION -->
+        <!-- BEGIN NEW FEATURES SECTION -->
+
         <section>
-          <aside class="notes">
-            <p>The strictly new stuff</p>
+          <section data-background="#ff7757">
+            <aside class="notes">
+            </aside>
+            <h1>HTTP/2:</h1>
+            <h1>All-new features</h1>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                With HTTP/1.1, the only way for a client to cancel a request is
+                to close the connection, potentially losing a TCP connection
+                that's already warmed up.
+              </p>
+              <p>
+                HTTP/2 lets you cancel any unfinished request, including those
+                initiated by the server with a PUSH_PROMISE.
+              </p>
+            </aside>
+            <h2>Stream Reset</h2>
+            <p>“j/k, I don't need that”</p>
+            <p>Cancel requests or pushes</p>
+          </section>
+
+          <section>
+            <h2>Graceful Shutdown</h2>
+            <p>Enabled by the <code>GOAWAY</code> frame</p>
             <ul>
-              <li>
-                Flow control:
-              </li>
-              <li>
-                Server push:
-              </li>
+              <li>Peer can stop accepting new streams, yet finish old ones</li>
+              <li>Includes ID of last processed stream</li>
+              <li>Can be sent by either client or server</li>
             </ul>
-          </aside>
-          <h1>HTTP/2: New features</h1>
-          <ul>
-            <li>Flow control</li>
-            <li>Server push</li>
-            <li>Stream priority</li>
-          </ul>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                HTTP/2 adds an extremely useful feature called Server Push which
+                lets the server preemptively send resources that it thinks the
+                client will need.
+              </p>
+              <p>
+                The usual example of this is when a client requests an HTML
+                page, then of course they're going to need any CSS, Javascript,
+                or images referenced in that document.
+              </p>
+              <p>
+                If you already know what the client will need, you can save two
+                round trips of latency by just pushing it to them.
+              </p>
+            </aside>
+            <h2>Server Push</h2>
+            <p>“Here, you'll need this too”</p>
+          </section>
+
+          <section>
+            <aside class='notes'>
+              <ul>
+                <li>
+                  "Suggestions" from a client to a server to prioritize certain
+                  resources.
+                </li>
+                <li>
+                  Pushed streams initially depend on their associated stream.
+                </li>
+                <li>
+                  Clients can alter at any time. If user moves to another tab or
+                  scrolls down the page, the client ask the server to adjust.
+                </li>
+              </ul>
+            </aside>
+            <h2>Stream Priority</h2>
+            <h4>Dependencies</h4>
+            <p>“B depends on A”</p>
+            <h4>Weight</h4>
+            <p>“C is ½ as important as A”</p>
+          </section>
         </section>
 
+        <!-- END NEW FEATURES SECTION -->
+        <!-- BEGIN CHALLENGES SECTION -->
+
+        <section>
+          <section>
+            <h1>Challenges</h1>
+          </section>
+
+          <section>
+            <h2>Push is awesome, I'm going to use it for everything!</h2>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                Which resources does the client need? How can we make it easy to
+                express that in our apps?
+              </p>
+            </aside>
+            <h2>Server Push</h2>
+            <h3>Not as simple as it seems</h3>
+            <ul>
+              <li>When do we push?</li>
+              <li>Which resources are needed?</li>
+              <li>Does the client already have it cached?</li>
+              <li>
+                How to combine with
+                <a target='_blank' href='https://w3c.github.io/resource-hints/'>resource hints?</a>
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+              </p>
+            </aside>
+            <h2>Server Push</h2>
+            <h3>What else can we push?</h3>
+            <ul>
+              <li>On 3XX, push the new resource</li>
+              <li>Push additional API responses</li>
+              <li>Push API dependencies for front-end apps</li>
+            </ul>
+            <p>...more...</p>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+              </p>
+            </aside>
+            <h2>Stream Priority</h2>
+            <p>What combination of weights and dependencies is optimal?</p>
+          </section>
+        </section>
+
+        <!-- END CHALLENGES SECTION -->
+        <!-- BEGIN TOOLS SECTION -->
+
+        <section>
+          <section>
+            <h1>Tools, Services, Abstractions</h1>
+          </section>
+
+          <section>
+            <aside class="notes">
+              <p>
+                Abstractions
+              </p>
+            </aside>
+
+            <p>How can clients determine and express dependency graphs?</p>
+          </section>
+        </section>
+
+        <!-- END TOOLS SECTION -->
 
         <section>
           <h1>References</h1>
