@@ -149,9 +149,6 @@
                   that made HTTP/1.1 pipelining so impractical.
                 </li>
                 <li>
-                  Flow control:
-                </li>
-                <li>
                   Header compression: HTTP headers are extremely redundant and
                   verbose, introducing a high overhead for each request
                   (especially small ones). With HTTP/2's header compression
@@ -179,7 +176,6 @@
             <h2>HTTP/2: Main Improvements</h2>
             <ul>
               <li>Multiplexed streams (requests &amp; responses)</li>
-              <li>Flow control</li>
               <li>Header compression (HPACK)</li>
               <li>Secure TLS required-<em>ish</em></li>
               <li>Less optional parts</li>
@@ -348,6 +344,16 @@
             <p>“B depends on A”</p>
             <h4>Weight</h4>
             <p>“C is ½ as important as A”</p>
+          </section>
+          <section>
+            <aside class='notes'>
+              <ul>
+                <li>
+                  Flow control....
+                </li>
+              </ul>
+            </aside>
+            <h2>Flow control</h2>
           </section>
         </section>
 
